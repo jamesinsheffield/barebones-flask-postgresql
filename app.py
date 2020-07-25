@@ -1,13 +1,20 @@
 import os
 from flask import Flask, render_template, redirect, url_for, request, flash
 from flask_sqlalchemy import SQLAlchemy
+import pandas as pd
 
 app = Flask(__name__)
 app.config.from_object(os.environ['APP_SETTINGS'])
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
-from models import Result
+from models import Words
+
+########## PSQL FUNCTIONS ##########
+def psql_to_pandas(query):
+    df = pd.read_sql(query.statement,db.session.bind)
+    return df
+####################################
 
 @app.route('/')
 def index():
@@ -15,32 +22,31 @@ def index():
 
 @app.route('/input', methods=['GET', 'POST'])
 def input():
-    errors = []
-    results = {}
     if request.method == "POST":
         # get text that the user has entered
         try:
-            text = request.form['text']
-            print(text)
+            category = request.form['category']
+            romanian = request.form['romanian']
+            english = request.form['english']
         except:
             flash("text submission unsuccessful","danger")
             return redirect(url_for('input'))
         # save the result to the DB:
         try:
-            result = Result(text=text)
-            db.session.add(result)
+            word = Words(category,romanian,english)
+            db.session.add(word)
             db.session.commit()
             flash("Text successfully submitted to DB","success")
             return redirect(url_for('input'))
         except:
             flash("Unable to add item to database","danger")
             return redirect(url_for('input'))
-    return render_template('input.html', errors=errors)
+    return render_template('input.html')
 
 @app.route('/table')
 def table():
-    results = Result.query.all()
-    return render_template("table.html", results=results)
+    words = psql_to_pandas(Words.query.order_by(Words.id))
+    return render_template("table.html", words=words)
 
 if __name__ == '__main__':
     app.run()

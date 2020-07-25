@@ -1,13 +1,19 @@
 from app import db
 
-class Result(db.Model):
-    __tablename__ = 'results'
+class Words(db.Model):
+    __tablename__ = 'words'
 
     id = db.Column(db.Integer, primary_key=True)
-    text = db.Column(db.String())
+    mark = db.Column(db.Integer)
+    category = db.Column(db.String())
+    romanian = db.Column(db.String())
+    english = db.Column(db.String())
 
-    def __init__(self, text):
-        self.text = text
+    def __init__(self,category,romanian,english):
+        self.mark = 1
+        self.category = category
+        self.romanian = romanian
+        self.english = english
 
     def __repr__(self):
-        return '<id {}>'.format(self.id)
+        return '<romanian {}>'.format(self.romanian)
