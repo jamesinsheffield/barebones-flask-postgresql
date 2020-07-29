@@ -33,7 +33,7 @@ def input():
             return redirect(url_for('input'))
         # save the result to the DB:
         try:
-            word = Words(category,romanian,english)
+            word = Words(1,category,romanian,english)
             db.session.add(word)
             db.session.commit()
             flash("Text successfully submitted to DB","success")
